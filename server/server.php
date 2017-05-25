@@ -25,9 +25,9 @@ $cmd = '/usr/local/php/bin/php';
 function  syncServer()
 {
     echo (yield ['mysqlPool']) .PHP_EOL;
-    echo (yield ['redisPool']) .PHP_EOL;
-    echo (yield ['task']) .PHP_EOL;
-    echo (yield ['hProse']) .PHP_EOL;
+//    echo (yield ['redisPool']) .PHP_EOL;
+//    echo (yield ['task']) .PHP_EOL;
+//    echo (yield ['hProse']) .PHP_EOL;
 }
 
 //异步调用
@@ -35,8 +35,9 @@ function asyncCaller(Generator $gen)
 {
     global $cmd;
     $task = $gen->current();
-    if(isset($task)){
-        switch ($task){
+    $taskName = $task[0];
+    if(isset($taskName)){
+        switch ($taskName){
             case 'mysqlPool':
                 foreach (glob(__DIR__.'/mysql/*.php') as $k =>$startUpFile){
                     exec($cmd.' '.$startUpFile);

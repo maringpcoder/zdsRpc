@@ -24,32 +24,32 @@ class DBServer {
 
     public function __construct()
     {
-        define('APPLICATION_PATH',dirname(dirname(__DIR__)).'/application');
+        define('APPLICATION_PATH',dirname(dirname(__DIR__)));
         define('MYPATH', dirname(APPLICATION_PATH));
-        $this ->application = new Yaf_Application(dirname(APPLICATION_PATH).'/conf/application.ini');
+        $this ->application = new Yaf_Application(APPLICATION_PATH.'/conf/application.ini');
         $this ->application->bootstrap();
         $configObjecter =Yaf_Registry::get('config');//获取注册表中寄存的项
         $this->config = $configObjecter->database->config->toArray();
         $this->SerConfig = $configObjecter->DbServer->toArray();
+
         $this ->poolSize = isset($this->SerConfig['pool_num']) ? $this->SerConfig['pool_num'] :20;//如果没有配置，默认给20个
         $this ->isAsync = isset($this->SerConfig['async'])?$this->SerConfig['async']:false;//如果没有，这默认不是异步mysql
-
         $this->multiprocess=isset($this->SerConfig['multiprocess'])?$this->SerConfig['multiprocess']:false;
         $this->http = new swoole_server("0.0.0.0", $this->SerConfig['port']);
         if($this->isAsync){//如果是异步
             $this ->http->set([
                 'worker_num'=>1,//1个进程大概占用40M内存，值不易过大，否者CPU开销负载太高
                 'max_request'=>0,//主要解决php内存泄漏溢出问题，这里显示设置未0
-                'daemonize'=>true,
+                'daemonize'=>false,
                 'dispatch_mode'=>1,
                 'log_file'=>$this->SerConfig['logfile']//服务运行日志，定义标准输出到应用目录下,服务器上需要做定时策略，定期清理日志(swoole不会切分文件)
             ]);
         }else{
             $this ->http->set([
-                'worker_num' => 10,
+                'worker_num' => 2,
                 'task_worker_num' => $this->poolSize,
                 'max_request' => 0,
-                'daemonize' => true,
+                'daemonize' => false,
                 'dispatch_mode' => 1,//todo 使用该模式可能会有问题还需考虑,先这样干起
                 'log_file' => $this->SerConfig['logfile']
             ]);
@@ -107,25 +107,46 @@ class DBServer {
      */
     public function doQuery($fd,$sql)
     {
-
+        //从空闲池取db
+        //$this->idlePool[array_rand($this->idlePool)];
+        $db = array_pop($this->idlePool);
+        $mysqli = $db['mysqli'];
+        /**
+         * @var mysqli $mysqli
+         */
+        $mysqli->query($sql,array(&$this,'doSQL'));
+        $db['fd'] = $fd;
+        //加入到忙碌工作池中
+        $this->busyPool[$db['db_sock']] = $db;
     }
 
+    public function doSQL()
+    {
+
+    }
 
     /**
      * @param swoole_server $serv
      */
     public function onStart(swoole_server $serv)
     {
+        $connectConfig = [
+        'host'=>$this->config['host'],
+        'user'=>$this->config['user'],
+        'password'=>$this->config['pwd'],
+        'database'=>$this->config['name'],
+        'charset'=>$this->config['charset']
+    ];
         for ($i=0;$this->poolSize;$i++){
             $db = new swoole_mysql();
-            $connectConfig = ['host'=>$this->config['host'],'user'=>$this->config['user'],'password'=>$this->config['password'],'database'=>$this->config['database'],
-            'charset'=>$this->config['charset']];
             $db->connect($connectConfig,function(swoole_mysql $db, bool $result){
                 if($result==false)
                 {
+                    var_dump($result);
                     //todo 打印日志，mysql连接失败
                 }
             });
+
             $db_sock = $db ->sock;
             $this->idlePool[] = [
                 'mysqli'=>$db,
@@ -163,3 +184,5 @@ class DBServer {
         return self::$instance;
     }
 }
+$dbserver= new DBServer();
+//DbServer::getInstance();
