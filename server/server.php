@@ -24,10 +24,10 @@ if(php_sapi_name()!='cli'){
 $cmd = '/usr/local/php/bin/php';
 function  syncServer()
 {
-    echo (yield ['mysqlpool']) .PHP_EOL;
-    echo (yield ['redispool']) .PHP_EOL;
+    echo (yield ['mysqlPool']) .PHP_EOL;
+    echo (yield ['redisPool']) .PHP_EOL;
     echo (yield ['task']) .PHP_EOL;
-    echo (yield ['hprose']) .PHP_EOL;
+    echo (yield ['hProse']) .PHP_EOL;
 }
 
 //异步调用
@@ -37,7 +37,7 @@ function asyncCaller(Generator $gen)
     $task = $gen->current();
     if(isset($task)){
         switch ($task){
-            case 'mysqlpool':
+            case 'mysqlPool':
                 foreach (glob(__DIR__.'/mysql/*.php') as $k =>$startUpFile){
                     exec($cmd.' '.$startUpFile);
                 }
@@ -45,7 +45,7 @@ function asyncCaller(Generator $gen)
                 $gen ->send("Mysql Pool Service Success!");
                 asyncCaller($gen);
                 break;
-            case 'redispool':
+            case 'redisPool':
                 foreach (glob(__DIR__.'/cache/*.php') as $k => $startUpFile){
                     exec($cmd.' '.$startUpFile);
                 }
@@ -61,12 +61,12 @@ function asyncCaller(Generator $gen)
                 $gen->send('Task Service start OK!');
                 asyncCaller($gen);
                 break;
-            case 'hprose':
+            case 'hProse':
                 foreach (glob(__DIR__.'/') as $startUpFile){
                     exec($cmd.' '.$startUpFile);
                 }
-                echo 'The Hprose Rpc Service Start......'.PHP_EOL;
-                $gen->send('The Hprose Rpc Service Start!');
+                echo 'The hProse Rpc Service Start......'.PHP_EOL;
+                $gen->send('The hProse Rpc Service Start!');
                 asyncCaller($gen);
                 break;
             default:
