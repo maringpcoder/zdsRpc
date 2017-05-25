@@ -143,7 +143,16 @@ class DBServer {
             $this->http->send($fd,json_encode($dataSelect));
         }
 
+        array_unshift($this->idlePool,$dbPoolItem);
+        unset($this->busyPool[$dbSock]);
 
+        if (count($this->waitQueue) > 0) {
+            $idle_n = count($this->idlePool);
+            for ($i = 0; $i < $idle_n; $i++) {
+                $req = array_shift($this->waitQueue);
+                $this->doQuery($req['fd'], $req['sql']);
+            }
+        }
 
     }
 
