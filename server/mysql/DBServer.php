@@ -11,6 +11,8 @@ class DBServer {
     public static $instance;
     public $http;
 
+    /** @var mysqli $link  */
+    protected static $link=null;
     protected  $poolSize = 20;
     protected $busyPool = array();//忙碌池
     protected $idlePool = array();//空闲池
@@ -25,7 +27,7 @@ class DBServer {
     public function __construct()
     {
         define('APPLICATION_PATH',dirname(dirname(__DIR__)));
-        define('MYPATH', dirname(APPLICATION_PATH));
+        define('MYPATH', '/var/log/swoole/mysql_running');
         $this ->application = new Yaf_Application(APPLICATION_PATH.'/conf/application.ini');
         $this ->application->bootstrap();
         $configObjecter =Yaf_Registry::get('config');//获取注册表中寄存的项
@@ -42,15 +44,15 @@ class DBServer {
                 'max_request'=>0,//主要解决php内存泄漏溢出问题，这里显示设置未0
                 'daemonize'=>false,
                 'dispatch_mode'=>1,
-                'log_file'=>$this->SerConfig['logfile']//服务运行日志，定义标准输出到应用目录下,服务器上需要做定时策略，定期清理日志(swoole不会切分文件)
+                'log_file'=>$this->SerConfig['logfile'].'/swoole_mysql.log'//服务运行日志，定义标准输出到应用目录下,服务器上需要做定时策略，定期清理日志(swoole不会切分文件)
             ]);
         }else{
             $this ->http->set([
-                'worker_num' => 2,
+                'worker_num' => 1,
                 'task_worker_num' => $this->poolSize,
                 'max_request' => 0,
                 'daemonize' => false,
-                'dispatch_mode' => 1,//todo 使用该模式可能会有问题还需考虑,先这样干起
+                'dispatch_mode' => 1,//todo 使用该模式可能会有问题还需考虑
                 'log_file' => $this->SerConfig['logfile']
             ]);
         }
@@ -120,8 +122,28 @@ class DBServer {
         $this->busyPool[$db['db_sock']] = $db;
     }
 
-    public function doSQL()
+    public function doSQL($link,$result)
     {
+        $dataSelect=array('status' =>'ok','error'=>0,'errormsg'=>'','result'=>'');
+        $dbSock = $link->sock;
+        $dbPoolItem = $this->busyPool[$dbSock];
+        $mysqli = $dbPoolItem['mysqli'];
+        $fd = $dbPoolItem['fd'];
+        if($result){
+            if(is_array($result)){//sql为查询类语句
+                $dataSelect['result']=$result;
+            }else{//费查询语句
+                $dataSelect['result']=['affected_row'=>$link->affected_rows,'insert_id'=>$link->Insert];
+            }
+            $this->http->send($fd,json_encode($dataSelect));
+        }else{//执行失败
+            $dataSelect['status'] = 'error';
+            $dataSelect['error'] =1;
+            $dataSelect['result'] = array();
+            $this->http->send($fd,json_encode($dataSelect));
+        }
+
+
 
     }
 
@@ -137,22 +159,21 @@ class DBServer {
         'database'=>$this->config['name'],
         'charset'=>$this->config['charset']
     ];
-        for ($i=0;$this->poolSize;$i++){
+        for ($i=0;$i < $this->poolSize;$i++){
             $db = new swoole_mysql();
             $db->connect($connectConfig,function(swoole_mysql $db, bool $result){
                 if($result==false)
                 {
-                    var_dump($result);
-                    //todo 打印日志，mysql连接失败
+//                    var_dump($result);连接失败,是否需要重连?
+                }else{
+                    $db_sock = $db ->sock;
+                    $this->idlePool[] = [//放入到空闲池中
+                        'mysqli'=>$db,
+                        'db_sock'=>$db_sock,
+                        'fd'=>0,
+                    ];
                 }
             });
-
-            $db_sock = $db ->sock;
-            $this->idlePool[] = [
-                'mysqli'=>$db,
-                'db_sock'=>$db_sock,
-                'fd'=>0,
-            ];
         }
     }
     public function onpipeMessage($serv, $src_worker_id, $data)
@@ -168,10 +189,36 @@ class DBServer {
      * @param int $src_worker_id
      * @param $data
      */
-    public function onTask(swoole_server $serv, int $task_id, int $src_worker_id, $data)
+    public function onTask(swoole_server $serv, int $task_id, int $src_worker_id, $sql)
     {
-
+        if(!self::$link){
+            self::$link = new mysqli();
+            $this ->syncMysqliConnect();
+        }
+        //执行sql如果失败，重试
+        for ($i=0;$i<2;$i++){
+            $result = self::$link->query($sql);
+            if($result == false){
+                if($result == '2006' || $result == '2013'){//mysql 连接失败，
+                    self::$link->close();
+                    //todo 这里需要加日志记录mysql重连
+                    $res = $this ->syncMysqliConnect();
+                }
+            }
+        }
     }
+
+    private function syncMysqliConnect(){
+        $result = false;
+       self::$link->connect($this->config['host'],$this->config['user'],$this->config['pwd'],$this->config['name']);
+        //设置数据库编码
+        if($result){
+            $result=self::$link->query("SET NAMES '{$this ->config['charset']}' ");
+            return $result;
+        }
+        return false;
+    }
+
 
     /**
      *
