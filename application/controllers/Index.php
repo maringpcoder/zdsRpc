@@ -53,8 +53,12 @@ class IndexController extends Yaf_Controller_Abstract {
 
     public function getUserAction()
     {
+        ini_set("display_errors", "On");
+        error_reporting(E_ALL | E_STRICT);
+        Yaf_Dispatcher::getInstance()->autoRender(FALSE);
+
         $userModel = new UserModel();
-        echo 333;
+        echo json_encode($userModel ->getUserById());
     }
 
 

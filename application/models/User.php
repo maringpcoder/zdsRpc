@@ -8,7 +8,7 @@
  */
 class UserModel extends BaseModel
 {
-    private $table = 'users';
+    private $table = 'user';
 
     public function __construct()
     {
@@ -17,6 +17,7 @@ class UserModel extends BaseModel
 
     public function getUserById()
     {
-        $this ->pdo ->select();
+
+        return $this ->db ->select($this->table,['name','id'],["id"=>[2,3,4,5]]);
     }
 }
