@@ -192,11 +192,13 @@ class DBServer {
         //$this->idle_pool=json_decode($data,true);
 
     }
+
     /**
      * @param swoole_server $serv
      * @param int $task_id
      * @param int $src_worker_id
-     * @param $data
+     * @param $sql
+     * @return bool|mixed|mysqli_result
      */
     public function onTask(swoole_server $serv, int $task_id, int $src_worker_id, $sql)
     {
