@@ -51,5 +51,11 @@ class IndexController extends Yaf_Controller_Abstract {
         exit;
     }
 
+    public function getUserAction()
+    {
+        $userModel = new UserModel();
+        echo 333;
+    }
+
 
 }
