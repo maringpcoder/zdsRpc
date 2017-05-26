@@ -143,7 +143,16 @@ class DBServer {
             $this->http->send($fd,json_encode($dataSelect));
         }
 
+        array_unshift($this->idlePool,$dbPoolItem);
+        unset($this->busyPool[$dbSock]);
 
+        if (count($this->waitQueue) > 0) {
+            $idle_n = count($this->idlePool);
+            for ($i = 0; $i < $idle_n; $i++) {
+                $req = array_shift($this->waitQueue);
+                $this->doQuery($req['fd'], $req['sql']);
+            }
+        }
 
     }
 
@@ -192,31 +201,44 @@ class DBServer {
     public function onTask(swoole_server $serv, int $task_id, int $src_worker_id, $sql)
     {
         if(!self::$link){
-            self::$link = new mysqli();
+            self::$link = new mysqli;
             $this ->syncMysqliConnect();
         }
-        //执行sql如果失败，重试
+        //执行sql如果失败,重试两次,一旦执行成功退出，如果执行失败，切发现Mysql断开了，重新连接myql
+        $result = false;
         for ($i=0;$i<2;$i++){
             $result = self::$link->query($sql);
-            if($result == false){
-                if($result == '2006' || $result == '2013'){//mysql 连接失败，
+            if($result === false){
+                if($result == '2006' || $result == '2013'){//mysql 已经断开连接，
                     self::$link->close();
-                    //todo 这里需要加日志记录mysql重连
+                    //todo 这里需要加日志记录,及使用mysql重连器进行重连
                     $res = $this ->syncMysqliConnect();
+                    if($res==true) continue;
                 }
             }
+            break;
         }
+
+        if(is_object($result)){
+            $data = $result->fetch_all(MYSQLI_ASSOC);
+            mysqli_free_result($result);
+        }else{
+            $data = $result;
+        }
+        return $data;
     }
 
-    private function syncMysqliConnect(){
-        $result = false;
-       self::$link->connect($this->config['host'],$this->config['user'],$this->config['pwd'],$this->config['name']);
-        //设置数据库编码
-        if($result){
+    private function syncMysqliConnect()
+    {
+        self::$link->connect($this->config['host'],$this->config['user'],$this->config['pwd'],$this->config['name']);
+        if(self::$link->ping()){
             $result=self::$link->query("SET NAMES '{$this ->config['charset']}' ");
             return $result;
+        }else{
+            return false;
         }
-        return false;
+
+
     }
 
 
