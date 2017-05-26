@@ -1,6 +1,7 @@
 <?php
 /**
  * 数据库链接线程池
+ * 功能：用户信息操作
  * Created by PhpStorm.
  * User: marin
  * Date: 2017/5/25
@@ -133,7 +134,7 @@ class DBServer {
             if(is_array($result)){//sql为查询类语句
                 $dataSelect['result']=$result;
             }else{//费查询语句
-                $dataSelect['result']=['affected_row'=>$link->affected_rows,'insert_id'=>$link->Insert];
+                $dataSelect['result']=['affected_row'=>$link->affected_rows,'insert_id'=>$link->insert_id];
             }
             $this->http->send($fd,json_encode($dataSelect));
         }else{//执行失败
@@ -206,10 +207,11 @@ class DBServer {
         for ($i=0;$i<2;$i++){
             $result = self::$link->query($sql);
             if($result === false){
-                if($result == '2006' || $result == '2013'){//mysql 已经断开连接，
+                if(self::$link->errno == '2006' or self::$link->errno == '2013'){//mysql 已经断开连接，
                     self::$link->close();
                     //todo 这里需要加日志记录,及使用mysql重连器进行重连
                     $res = $this ->syncMysqliConnect();
+                    self::$link->query("SET NAMES '{$this ->config['charset']}' ");
                     if($res==true) continue;
                 }
             }
@@ -228,14 +230,7 @@ class DBServer {
     private function syncMysqliConnect()
     {
         self::$link->connect($this->config['host'],$this->config['user'],$this->config['pwd'],$this->config['name']);
-        if(self::$link->ping()){
-            $result=self::$link->query("SET NAMES '{$this ->config['charset']}' ");
-            return $result;
-        }else{
-            return false;
-        }
-
-
+        return true;
     }
 
 

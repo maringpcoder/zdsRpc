@@ -30,4 +30,26 @@ class IndexController extends Yaf_Controller_Abstract {
 		//4. render by Yaf, 如果这里返回FALSE, Yaf将不会调用自动视图引擎Render模板
         return TRUE;
 	}
+
+	public function dbTestAction()
+    {
+        ini_set("display_errors", "On");
+        error_reporting(E_ALL | E_STRICT);
+        Yaf_Dispatcher::getInstance()->autoRender(FALSE);
+        $dbClient=new mysql_dbclient;
+
+        //print_r($data);
+        for ($i=0; $i <10 ; $i++) {
+            //$dbClient->query("INSERT INTO user(name) VALUES('$i')");
+            $dbClient ->insert('user',['name'=>'']);
+            //echo "INSERT INTO user(name) VALUES('$i')";
+        }
+
+        $data=$dbClient->query("select * from user");
+        $dbClient->close();
+        print_r($data);
+        exit;
+    }
+
+
 }
