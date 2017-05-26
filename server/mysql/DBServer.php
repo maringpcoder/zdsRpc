@@ -116,10 +116,10 @@ class DBServer {
         /**
          * @var mysqli $mysqli
          */
-        $mysqli->query($sql,array(&$this,'doSQL'));
         $db['fd'] = $fd;
         //加入到忙碌工作池中
         $this->busyPool[$db['db_sock']] = $db;
+        $mysqli->query($sql,array(&$this,'doSQL'));
     }
 
     public function doSQL($link,$result)
@@ -129,6 +129,7 @@ class DBServer {
         $dbPoolItem = $this->busyPool[$dbSock];
         $mysqli = $dbPoolItem['mysqli'];
         $fd = $dbPoolItem['fd'];
+
         if($result){
             if(is_array($result)){//sql为查询类语句
                 $dataSelect['result']=$result;
@@ -161,13 +162,7 @@ class DBServer {
      */
     public function onStart(swoole_server $serv)
     {
-        $connectConfig = [
-        'host'=>$this->config['host'],
-        'user'=>$this->config['user'],
-        'password'=>$this->config['pwd'],
-        'database'=>$this->config['name'],
-        'charset'=>$this->config['charset']
-    ];
+        $connectConfig = $this->getDbConfigForConnection();
         for ($i=0;$i < $this->poolSize;$i++){
             $db = new swoole_mysql();
             $db->connect($connectConfig,function(swoole_mysql $db, bool $result){
@@ -185,6 +180,7 @@ class DBServer {
             });
         }
     }
+
     public function onpipeMessage($serv, $src_worker_id, $data)
     {
         //echo "{$serv->worker_id} message from $src_worker_id: $data\n";
@@ -253,6 +249,18 @@ class DBServer {
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+
+    protected function getDbConfigForConnection()
+    {
+        return [
+            'host'=>$this->config['host'],
+            'user'=>$this->config['user'],
+            'password'=>$this->config['pwd'],
+            'database'=>$this->config['name'],
+            'charset'=>$this->config['charset']
+        ];
     }
 }
 $dbserver= new DBServer();
