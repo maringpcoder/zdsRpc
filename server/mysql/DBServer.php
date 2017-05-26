@@ -116,10 +116,10 @@ class DBServer {
         /**
          * @var mysqli $mysqli
          */
-        $mysqli->query($sql,array(&$this,'doSQL'));
         $db['fd'] = $fd;
         //加入到忙碌工作池中
         $this->busyPool[$db['db_sock']] = $db;
+        $mysqli->query($sql,array(&$this,'doSQL'));
     }
 
     public function doSQL($link,$result)
@@ -129,11 +129,12 @@ class DBServer {
         $dbPoolItem = $this->busyPool[$dbSock];
         $mysqli = $dbPoolItem['mysqli'];
         $fd = $dbPoolItem['fd'];
+
         if($result){
             if(is_array($result)){//sql为查询类语句
                 $dataSelect['result']=$result;
             }else{//费查询语句
-                $dataSelect['result']=['affected_row'=>$link->affected_rows,'insert_id'=>$link->Insert];
+                $dataSelect['result']=['affected_row'=>$link->affected_rows,'insert_id'=>$link->insert_id];
             }
             $this->http->send($fd,json_encode($dataSelect));
         }else{//执行失败
@@ -161,13 +162,7 @@ class DBServer {
      */
     public function onStart(swoole_server $serv)
     {
-        $connectConfig = [
-        'host'=>$this->config['host'],
-        'user'=>$this->config['user'],
-        'password'=>$this->config['pwd'],
-        'database'=>$this->config['name'],
-        'charset'=>$this->config['charset']
-    ];
+        $connectConfig = $this->getDbConfigForConnection();
         for ($i=0;$i < $this->poolSize;$i++){
             $db = new swoole_mysql();
             $db->connect($connectConfig,function(swoole_mysql $db, bool $result){
@@ -185,6 +180,7 @@ class DBServer {
             });
         }
     }
+
     public function onpipeMessage($serv, $src_worker_id, $data)
     {
         //echo "{$serv->worker_id} message from $src_worker_id: $data\n";
@@ -211,10 +207,11 @@ class DBServer {
         for ($i=0;$i<2;$i++){
             $result = self::$link->query($sql);
             if($result === false){
-                if($result == '2006' || $result == '2013'){//mysql 已经断开连接，
+                if(self::$link->errno == '2006' or self::$link->errno == '2013'){//mysql 已经断开连接，
                     self::$link->close();
                     //todo 这里需要加日志记录,及使用mysql重连器进行重连
                     $res = $this ->syncMysqliConnect();
+                    self::$link->query("SET NAMES '{$this ->config['charset']}' ");
                     if($res==true) continue;
                 }
             }
@@ -233,14 +230,7 @@ class DBServer {
     private function syncMysqliConnect()
     {
         self::$link->connect($this->config['host'],$this->config['user'],$this->config['pwd'],$this->config['name']);
-        if(self::$link->ping()){
-            $result=self::$link->query("SET NAMES '{$this ->config['charset']}' ");
-            return $result;
-        }else{
-            return false;
-        }
-
-
+        return true;
     }
 
 
@@ -253,6 +243,18 @@ class DBServer {
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+
+    protected function getDbConfigForConnection()
+    {
+        return [
+            'host'=>$this->config['host'],
+            'user'=>$this->config['user'],
+            'password'=>$this->config['pwd'],
+            'database'=>$this->config['name'],
+            'charset'=>$this->config['charset']
+        ];
     }
 }
 $dbserver= new DBServer();
