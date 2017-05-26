@@ -1,7 +1,6 @@
 <?php
 /**
  * 数据库链接线程池
- * 功能：用户信息操作
  * Created by PhpStorm.
  * User: marin
  * Date: 2017/5/25
