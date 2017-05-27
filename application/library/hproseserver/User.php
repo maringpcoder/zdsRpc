@@ -6,13 +6,11 @@
  * Date: 2017/5/27
  * Time: 13:36
  */
-class userInfo {
-
+class hProseServer_User {
 
     public function add()
     {
-        return 'add library';
+        return 'add library usersInfo class !';
     }
-
 
 }

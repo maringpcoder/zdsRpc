@@ -38,13 +38,14 @@ class DBServer {
         $this ->isAsync = isset($this->SerConfig['async'])?$this->SerConfig['async']:false;//如果没有，这默认不是异步mysql
         $this->multiprocess=isset($this->SerConfig['multiprocess'])?$this->SerConfig['multiprocess']:false;
         $this->http = new swoole_server("0.0.0.0", $this->SerConfig['port']);
+
         if($this->isAsync){//如果是异步
             $this ->http->set([
                 'worker_num'=>1,//1个进程大概占用40M内存，值不易过大，否者CPU开销负载太高
                 'max_request'=>0,//主要解决php内存泄漏溢出问题，这里显示设置未0
                 'daemonize'=>false,
                 'dispatch_mode'=>1,
-                'log_file'=>$this->SerConfig['logfile'].'/swoole_mysql.log'//服务运行日志，定义标准输出到应用目录下,服务器上需要做定时策略，定期清理日志(swoole不会切分文件)
+                'log_file'=>$this->SerConfig['logfile'].'/swoole_mysql_async.log'//服务运行日志，定义标准输出到应用目录下,服务器上需要做定时策略，定期清理日志(swoole不会切分文件)
             ]);
         }else{
             $this ->http->set([
@@ -53,7 +54,7 @@ class DBServer {
                 'max_request' => 0,
                 'daemonize' => false,
                 'dispatch_mode' => 1,//todo 使用该模式可能会有问题还需考虑
-                'log_file' => $this->SerConfig['logfile']
+                'log_file' => $this->SerConfig['logfile'].'swoole_mysql_sync.log'
             ]);
         }
 
@@ -70,7 +71,9 @@ class DBServer {
     }
 
     public function onReceive(swoole_server $server, int $fd, int $from_id, string $sql){
+        echo $sql.PHP_EOL;
         if($this->isAsync){//异步
+            echo "this is async".PHP_EOL;
             if(count($this->idlePool) ==0){//当前没有空闲的db可用
                 if(count($this->waitQueue) < $this->waitQueueMax){
                     $this->waitQueue[] = array(
@@ -84,16 +87,17 @@ class DBServer {
                 $this ->doQuery($fd,$sql);
             }
         }else{
+            echo "this is sync".PHP_EOL;
             if($this->multiprocess){
                 $result = $this ->http->task($sql);//投递任务到task worker池
             }else{
                 $result = $this ->http->taskwait($sql);//异步阻塞
             }
             $data_resp=array('status' =>'ok','error'=>0,'errormsg'=>'','result'=>'');
-            if($result !== false){//任务投递失败
+            if($result !== false){
                 $data_resp['result']=$result;
                 $this->http->send($fd,json_encode($data_resp));
-            }else{
+            }else{//任务投递失败
                 $data_resp['error']=1;
                 $data_resp['status']='error';
                 //$data_resp['errormsg']=sprintf("MySQLi Error: %s\n", mysqli_error($mysqli));
@@ -136,11 +140,14 @@ class DBServer {
             }else{//费查询语句
                 $dataSelect['result']=['affected_row'=>$link->affected_rows,'insert_id'=>$link->insert_id];
             }
+            echo "doSql :".json_encode($dataSelect).PHP_EOL;
             $this->http->send($fd,json_encode($dataSelect));
         }else{//执行失败
+            //todo 重新执行mysql链接
             $dataSelect['status'] = 'error';
             $dataSelect['error'] =1;
             $dataSelect['result'] = array();
+
             $this->http->send($fd,json_encode($dataSelect));
         }
 
@@ -150,8 +157,8 @@ class DBServer {
         if (count($this->waitQueue) > 0) {
             $idle_n = count($this->idlePool);
             for ($i = 0; $i < $idle_n; $i++) {
-                $req = array_shift($this->waitQueue);
-                $this->doQuery($req['fd'], $req['sql']);
+                $waitItem = array_shift($this->waitQueue);
+                $this->doQuery($waitItem['fd'], $waitItem['sql']);
             }
         }
 

@@ -33,21 +33,17 @@ class IndexController extends Yaf_Controller_Abstract {
 
 	public function dbTestAction()
     {
-        ini_set("display_errors", "On");
-        error_reporting(E_ALL | E_STRICT);
-        Yaf_Dispatcher::getInstance()->autoRender(FALSE);
-        $dbClient=new mysql_dbclient;
-
+        $dbClient=new mysql_dbclient();
         //print_r($data);
         for ($i=0; $i <10 ; $i++) {
             //$dbClient->query("INSERT INTO user(name) VALUES('$i')");
-            $dbClient ->insert('user',['name'=>'']);
+            $dbClient ->insert('panda_log.user',['name'=>"zhengdiao".$i,'age'=>23]);
             //echo "INSERT INTO user(name) VALUES('$i')";
         }
-
         $data=$dbClient->query("select * from user");
-        $dbClient->close();
-        print_r($data);
+        echo  $data;
+//        $dbClient->close();
+//        print_r($data);
         exit;
     }
 
@@ -67,7 +63,7 @@ class IndexController extends Yaf_Controller_Abstract {
 //        }catch (Exception $exception){
 //            echo $exception->getMessage();
 //        }
-//        echo hprose::getInstance()->getdata();
+        echo hprose::getInstance()->getdata();
         echo hprose::getInstance()->getUserInfo();
         exit;
 

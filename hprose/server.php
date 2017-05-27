@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/hprose/lib/Server.php';
 /**
- * rpc服务端,提供方法发布,对象等其他操作
+ * rpc服务端,提供方法,函数,类的公开方法，类的静态方法发布,对象等其他操作
  * Created by PhpStorm.
  * User: marin
  * Date: 2017/5/25
@@ -18,7 +18,7 @@ class rpcServer
         $process = new swoole_process([$this ,'hProseServerCall'],false,true);
         $process->start();
         echo 'FID:'.posix_getpid().PHP_EOL;//获取主进程id
-        swoole_process::daemon(true);
+        swoole_process::daemon(false);
         swoole_process::wait();
     }
 
@@ -60,7 +60,7 @@ class rpcServer
      */
     public function releaseObjMethods()
     {
-        $this ->_server ->addMethod('add',new userInfo());
+        $this ->_server ->addMethod('add',new hProseServer_User());
         //$this ->_server ->addInstanceMethods($userInfo,'','');
     }
 

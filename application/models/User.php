@@ -17,7 +17,7 @@ class UserModel extends BaseModel
 
     public function getUserById()
     {
-
-        return $this ->db ->select($this->table,['name','id'],["id"=>[2,3,4,5]]);
+//        return $this ->db ->select($this->table,['name','id'],["id"=>[2,3,4,5]]);
+        return $this ->db ->query('select * from user')->fetchAll();
     }
 }

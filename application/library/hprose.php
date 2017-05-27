@@ -1,5 +1,10 @@
 <?php
 require_once dirname(dirname(__DIR__)) . '/hprose/lib/Client.php';
+
+/**
+ * 自定义hprsose客户端
+ * Class hprose
+ */
 class hprose
 {
     public static $instance;
