@@ -16,7 +16,7 @@ class IndexController extends Yaf_Controller_Abstract {
         $configObjecter =Yaf_Registry::get('config');
         var_dump($configObjecter);
         $cf =$configObjecter->database->config->toArray();
-        var_dump($cf);
+        var_dump($cf);exit();
 		//1. fetch query
 		$get = $this->getRequest()->getQuery("get", "default value");
 
@@ -53,12 +53,24 @@ class IndexController extends Yaf_Controller_Abstract {
 
     public function getUserAction()
     {
-        ini_set("display_errors", "On");
-        error_reporting(E_ALL | E_STRICT);
-        Yaf_Dispatcher::getInstance()->autoRender(FALSE);
-
         $userModel = new UserModel();
         echo json_encode($userModel ->getUserById());
+    }
+
+
+
+    public function hproseAction(){
+        //hprose调用
+//        try{
+//            echo user_TestFc();
+//            echo testFc();exit();
+//        }catch (Exception $exception){
+//            echo $exception->getMessage();
+//        }
+//        echo hprose::getInstance()->getdata();
+        echo hprose::getInstance()->getUserInfo();
+        exit;
+
     }
 
 
