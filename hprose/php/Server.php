@@ -32,18 +32,26 @@ class rpcServer
         $this->release();
     }
 
-
+    /**
+     * 方法发布
+     */
     private function release()
     {
         $this ->releaseStaticMethods();
+        $this ->releaseObjMethods();
     }
 
-
+    /**
+     * 发布类的静态方法
+     */
     public function releaseStaticMethods()
     {
 
     }
 
+    /**
+     * 发布对象的方法
+     */
     public function releaseObjMethods()
     {
 
