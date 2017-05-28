@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * 使用mysql线程池，
  * 简单封装 后边根据需要自行修改
  * Class mysql_dbclient
  * @property swoole_client $client
@@ -20,7 +21,7 @@ class mysql_dbclient
     }
  
     public function query($sql) {
-        echo $sql.'<hr>';
+//        echo $sql.'<hr>';
         $this->client->send($sql);
         return $this->client->recv();
     }
