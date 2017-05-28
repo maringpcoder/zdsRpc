@@ -48,7 +48,7 @@ class rpcServer
     }
 
     /**
-     * 发布类的静态方法
+     * 发布类的静态method
      */
     public function releaseStaticMethods()
     {
@@ -56,34 +56,39 @@ class rpcServer
     }
 
     /**
-     * 发布对象的方法
+     * 发布对象的公开method
      */
-    public function releaseObjMethods()
+    protected function releaseObjMethods()
     {
-        $this ->_server ->addMethod('add',new hProseServer_User());
-        //$this ->_server ->addInstanceMethods($userInfo,'','');
+        $methodConfig = $this ->getPrepareToReleaseConfig();
+        foreach ($methodConfig as $obj=>$methodsArr){
+            $this ->_server ->addMethods($methodsArr,unserialize($obj));
+        }
+    }
+
+    /**
+     * 新加类或者对象的公开方法配置
+     */
+    protected function getPrepareToReleaseConfig()
+    {
+        return $methodsObjectItems = array(
+            serialize(new hProseServer_User())=>['getAllUser','editUser'],//发布hproseServer_User类中的方法配置
+        );
     }
 
     /**
      * 发布函数
      */
-    public function releaseFunction()
+    protected function releaseFunction()
     {
 
         $this->_server->addFunction('testFc');
     }
 
 
-
     public static function run()
     {
-//        define('APPLICATION_PATH', dirname(__DIR__));
-//        $application = new Yaf_Application(APPLICATION_PATH . "/conf/application.ini");
-//        $application->bootstrap();
-//        $userInfo = new userInfo();
-//        echo $userInfo ->add();
         new self();
-
     }
 }
 

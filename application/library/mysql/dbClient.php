@@ -6,7 +6,7 @@
  * Class mysql_dbclient
  * @property swoole_client $client
  */
-class mysql_dbclient
+class dbClient
 {
     private $client;
  
@@ -21,7 +21,6 @@ class mysql_dbclient
     }
  
     public function query($sql) {
-//        echo $sql.'<hr>';
         $this->client->send($sql);
         return $this->client->recv();
     }

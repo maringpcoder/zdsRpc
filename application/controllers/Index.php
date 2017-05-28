@@ -37,10 +37,10 @@ class IndexController extends Yaf_Controller_Abstract {
         //print_r($data);
         for ($i=0; $i <10 ; $i++) {
             //$dbClient->query("INSERT INTO user(name) VALUES('$i')");
-            $dbClient ->insert('panda_log.user',['name'=>"zhengdiao".$i,'age'=>23]);
+            $dbClient ->insert('user',['name'=>"zhengdiao".$i,'age'=>23]);
             //echo "INSERT INTO user(name) VALUES('$i')";
         }
-        $data=$dbClient->query("select * from user");
+        $data=$dbClient->query("select *  from user");
         echo  $data;
 //        $dbClient->close();
 //        print_r($data);
@@ -53,21 +53,13 @@ class IndexController extends Yaf_Controller_Abstract {
         echo json_encode($userModel ->getUserById());
     }
 
-
-
     public function hproseAction(){
-        //hprose调用
-//        try{
-//            echo user_TestFc();
-//            echo testFc();exit();
-//        }catch (Exception $exception){
-//            echo $exception->getMessage();
-//        }
-        echo hprose::getInstance()->getdata();
-        echo hprose::getInstance()->getUserInfo();
-        exit;
-
+        echo HProseClient::getInstance()->getAllUser();
     }
 
+    public function getUsAction(){
+        $us = new UserModel();
+        var_dump($us ->getUserById());
+    }
 
 }

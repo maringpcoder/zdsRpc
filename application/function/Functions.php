@@ -735,3 +735,19 @@ function testFc()
 {
     return "this is a test function ";
 }
+
+/**
+ * json数据返回格式定义
+ * @param int $code
+ * @param string $msg
+ * @param $data
+ * @return string
+ */
+function writeToJson($code,$msg='',$data=array())
+{
+    $result = array();
+    $result['code'] = $code;
+    $result['msg'] = $msg;
+    $result['data'] = $data;
+    return json_encode($result);
+}

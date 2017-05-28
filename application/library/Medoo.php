@@ -265,6 +265,7 @@ class Medoo
 
 	public function exec($query, $map = [])
 	{
+	    error_log($query."\r\n",3,"sql.log");
 		if ($this->debug_mode)
 		{
 			echo $this->generate($query, $map);
