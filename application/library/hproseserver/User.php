@@ -6,7 +6,7 @@
  * Date: 2017/5/27
  * Time: 13:36
  */
-class hProseServer_User extends BaseModel {
+class hProseServer_User {
 
     /**
      *
@@ -14,7 +14,7 @@ class hProseServer_User extends BaseModel {
      */
     public function getAllUser()
     {
-        $data =  $this ->db ->select('user','*');
+        $data =  hProseServer_DBfactory::New()->select('user','*');
         return writeToJson(1000,'',$data);
     }
     public function editUser($data)
