@@ -62,10 +62,21 @@ class IndexController extends Yaf_Controller_Abstract {
         var_dump($us ->getUserById());
     }
 
-		public function getAgentIdAction()
-		{
+    public function getAgentIdAction()
+    {
 
-			  echo HProseClient::getInstance()->getAgentId();
-		}
+          echo HProseClient::getInstance()->getAgentId();
+    }
+
+    public function updateUserAction()
+    {
+        echo HProseClient::getInstance()->updateUser(['name'=>'孙雨梅','age'=>90],['id'=>1]);
+    }
+
+    public function userListAction()
+    {
+        $sql = 'select * from `user` ';
+        echo HProseClient::getInstance()->getUserByPage($sql,2,2);
+    }
 
 }

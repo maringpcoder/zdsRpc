@@ -22,4 +22,12 @@ class hProseServer_User extends BaseModel {
         return 'RPC editUser methods!';
     }
 
+    /**
+     * 获取用户数据,分页
+     */
+    public function getUserPage()
+    {
+
+    }
+
 }

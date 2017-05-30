@@ -41,4 +41,14 @@ class HProseClient
       return $this ->client ->getAgentId();
     }
 
+    public function updateUser($data,$where)
+    {
+        return $this ->client ->updateUser($data,$where);
+    }
+
+    public function getUserByPage($sql,$page='',$pageSize='',$order='')
+    {
+        return $this ->client ->userList($sql,$page,$pageSize,$order);
+    }
+
 }

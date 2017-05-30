@@ -73,7 +73,7 @@ class rpcServer
     {
         return $methodsObjectItems = array(
             "getAllUser,editUser" =>new hProseServer_User(),//发布hproseServer_User类中的方法配置
-            "getAgentId" => new hProseServer_Agent()
+            "getAgentId,updateUser,userList" => new hProseServer_Agent()
             //serialize(new hProseServer_Agent())=>[]
         );
     }
