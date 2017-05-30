@@ -61,8 +61,8 @@ class rpcServer
     protected function releaseObjMethods()
     {
         $methodConfig = $this ->getPrepareToReleaseConfig();
-        foreach ($methodConfig as $obj=>$methodsArr){
-            $this ->_server ->addMethods($methodsArr,unserialize($obj));
+        foreach ($methodConfig as $methodArr=>$obj){
+            $this ->_server ->addMethods(explode(',',$methodArr),$obj);
         }
     }
 
@@ -72,7 +72,9 @@ class rpcServer
     protected function getPrepareToReleaseConfig()
     {
         return $methodsObjectItems = array(
-            serialize(new hProseServer_User())=>['getAllUser','editUser'],//发布hproseServer_User类中的方法配置
+            "getAllUser,editUser" =>new hProseServer_User(),//发布hproseServer_User类中的方法配置
+            "getAgentId" => new hProseServer_Agent()
+            //serialize(new hProseServer_Agent())=>[]
         );
     }
 

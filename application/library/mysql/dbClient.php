@@ -9,7 +9,7 @@
 class dbClient
 {
     private $client;
- 
+
     public function __construct() {
         $this->client = new swoole_client(SWOOLE_SOCK_TCP);
         $config_obj=Yaf_Registry::get("config");
@@ -19,7 +19,7 @@ class dbClient
             exit("connect failed. Error: {$this->client->errCode}\n");
         }
     }
- 
+
     public function query($sql) {
         $this->client->send($sql);
         return $this->client->recv();

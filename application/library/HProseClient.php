@@ -36,6 +36,9 @@ class HProseClient
         return self::$instance;
     }
 
+    public function getAgentId()
+    {
+      return $this ->client ->getAgentId();
+    }
 
 }
-

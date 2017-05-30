@@ -81,6 +81,7 @@ class DBServer {
                         'sql'=>$sql
                     );
                 }else{
+                    echo "request too many ,Please try again later";
                     $this->http->send($fd,"request too many ,Please try again later");
                 }
             }else{
@@ -141,13 +142,14 @@ class DBServer {
                 $dataSelect['result']=['affected_row'=>$link->affected_rows,'insert_id'=>$link->insert_id];
             }
             echo "doSql :".json_encode($dataSelect).PHP_EOL;
+
             $this->http->send($fd,json_encode($dataSelect));
         }else{//执行失败
             //todo 重新执行mysql链接
             $dataSelect['status'] = 'error';
             $dataSelect['error'] =1;
             $dataSelect['result'] = array();
-
+            echo 'this is false '.PHP_EOL;
             $this->http->send($fd,json_encode($dataSelect));
         }
 
