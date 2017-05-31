@@ -33,6 +33,7 @@ class rpcServer
         $this->_server = new Server("tcp://" . $hProseConfig['ServerIp'] . ":" . $hProseConfig['port']);
         $this->_server->setErrorTypes(E_ALL);
         $this->_server->setDebugEnabled();//打开调试开关
+        Yaf_Loader::getInstance()->registerLocalNamespace(['hproseserver']);
         $this->release();
         $this->_server->start();
     }

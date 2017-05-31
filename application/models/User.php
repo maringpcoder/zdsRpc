@@ -19,7 +19,7 @@ class UserModel extends BaseModel
     {
 //        return $this ->db ->select($this->table,['name','id'],["id"=>[2,3,4,5]]);
 //        return $this ->db ->query('select * from user')->fetchAll(PDO::FETCH_ASSOC);
-        return $this ->db->get($this->table,'*');
+        return $this ->db->select($this->table,['name','id']);
         //return $this ->db ->query('select * from user')->fetchAll();
     }
 }

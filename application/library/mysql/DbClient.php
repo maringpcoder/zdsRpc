@@ -6,7 +6,7 @@
  * Class mysql_dbclient
  * @property swoole_client $client
  */
-class Mysql_dbClient
+class Mysql_DbClient
 {
     public $client;
     public function __construct() {

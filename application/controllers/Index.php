@@ -13,6 +13,12 @@ class IndexController extends Yaf_Controller_Abstract {
      * 对于如下的例子, 当访问http://yourhost/ApiService/index/index/index/name/root 的时候, 你就会发现不同
      */
 	public function indexAction($name = "Stranger") {
+//        new RedisCache();
+        $configObjecter =Yaf_Registry::get('config')->Cache->toArray()['redis'];
+        var_dump($configObjecter);
+        exit();
+
+
         $configObjecter =Yaf_Registry::get('config');
         var_dump($configObjecter);
         $cf =$configObjecter->database->config->toArray();
