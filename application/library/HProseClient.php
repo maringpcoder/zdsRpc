@@ -17,9 +17,9 @@ class HProseClient
         $this ->client = new  Client("tcp://" . $hProseConf['ServerIp'] . ":" . $hProseConf['port'],false);
     }
 
-    public  function getAllUser()
+    public  function getAllUser($page,$pageSize)
     {
-        return $this ->client ->getAllUser();
+        return $this ->client ->getAllUser($page,$pageSize);
     }
 
     public function editUser()

@@ -8,13 +8,17 @@
  */
 class hProseServer_User {
 
+
     /**
      *
      * @return array|bool
      */
-    public function getAllUser()
+    public function getAllUser($page,$pageSize)
     {
-        $data =  hProseServer_DBfactory::New()->select('user','*');
+        $page = intval($page) <= 1 ? 1 : intval($page);
+        $pageSize = intval($pageSize) ? intval($pageSize) : 20;
+        $startNum = ($page - 1) * $pageSize;
+        $data =  hProseServer_Factory::NewDB()->select('users',['user_name','password','type','true_name'],['LIMIT'=>[$startNum,$pageSize]]);
         return writeToJson(1000,'',$data);
     }
     public function editUser($data)

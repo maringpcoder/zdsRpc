@@ -7,8 +7,19 @@
  */
 class ThriftClient
 {
+    public static $instance;
+    public  $client=null;
+
     public function __construct()
     {
         //todo  创建客户端
+    }
+
+    public static function getInstance()
+    {
+        if (!(self::$instance instanceof hproseClient)) {
+            self::$instance = new hproseClient();
+        }
+        return self::$instance;
     }
 }

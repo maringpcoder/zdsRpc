@@ -64,7 +64,7 @@ class IndexController extends Yaf_Controller_Abstract {
     }
 
     public function hproseAction(){
-        echo HProseClient::getInstance()->getAllUser();
+        echo ClientRpc::getClient()->getAllUser(3,5);
     }
 
     public function getUsAction(){
@@ -74,8 +74,8 @@ class IndexController extends Yaf_Controller_Abstract {
 
     public function getAgentIdAction()
     {
-
-          echo HProseClient::getInstance()->getAgentId();
+        echo ClientRpc::getClient()->getAgentId();
+//          echo HProseClient::getInstance()->getAgentId();
     }
 
     public function updateUserAction()
@@ -87,6 +87,9 @@ class IndexController extends Yaf_Controller_Abstract {
     {
         $sql = 'select * from `user` ';
         echo HProseClient::getInstance()->getUserByPage($sql,2,2);
+
+
     }
+
 
 }

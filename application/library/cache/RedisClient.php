@@ -16,6 +16,7 @@ class Cache_RedisClient
         {
             exit("connect failed. Error: {$this->client->errCode}\n");
         }
+        Log::getInstance()->println('Redis pool connect successful');
     }
 
 }

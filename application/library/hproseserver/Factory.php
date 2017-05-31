@@ -35,7 +35,7 @@ class hProseServer_Factory
     public static function NewCache($type='')
     {
         switch ($type){
-            case 'pool':
+            case 'pool'://暂不支持
                 return Cache_RedisCache::getInstance();
                 break;
             case 'redis':
