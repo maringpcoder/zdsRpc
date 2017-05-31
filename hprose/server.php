@@ -33,7 +33,7 @@ class rpcServer
         $this->_server = new Server("tcp://" . $hProseConfig['ServerIp'] . ":" . $hProseConfig['port']);
         $this->_server->setErrorTypes(E_ALL);
         $this->_server->setDebugEnabled();//打开调试开关
-        Yaf_Loader::getInstance()->registerLocalNamespace(['hproseserver']);
+        Yaf_Loader::getInstance()->registerLocalNamespace(['hproseserver','cache','mysql']);
         $this->release();
         $this->_server->start();
     }
@@ -51,7 +51,7 @@ class rpcServer
     /**
      * 发布类的静态method
      */
-    public function releaseStaticMethods()
+    protected function releaseStaticMethods()
     {
 
     }
@@ -68,6 +68,14 @@ class rpcServer
     }
 
     /**
+     * 发布函数
+     */
+    protected function releaseFunction()
+    {
+        $this->_server->addFunction('testFc');
+    }
+
+    /**
      * 新加类或者对象的公开方法配置
      */
     protected function getPrepareToReleaseConfig()
@@ -75,18 +83,10 @@ class rpcServer
         return $methodsObjectItems = array(
             "getAllUser,editUser" =>new hProseServer_User(),//发布hproseServer_User类中的方法配置
             "getAgentId,updateUser,userList" => new hProseServer_Agent()
-            //serialize(new hProseServer_Agent())=>[]
         );
     }
 
-    /**
-     * 发布函数
-     */
-    protected function releaseFunction()
-    {
 
-        $this->_server->addFunction('testFc');
-    }
 
 
     public static function run()

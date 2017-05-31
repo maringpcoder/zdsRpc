@@ -27,13 +27,19 @@ class hProseServer_Factory
         }
     }
 
-
+    /**
+     * 创建链接对象
+     * @param string $type
+     * @return Cache_RedisCache|Cache_RedisPool|null
+     */
     public static function NewCache($type='')
     {
         switch ($type){
             case 'pool':
+                return Cache_RedisCache::getInstance();
                 break;
             case 'redis':
+                return new Cache_RedisPool();
                 break;
         }
     }
