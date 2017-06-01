@@ -17,8 +17,8 @@ class rpcServer
     {
         $process = new swoole_process([$this ,'hProseServerCall'],false,true);
         $process->start();
-        echo 'FID:'.posix_getpid().PHP_EOL;//获取主进程id
-        swoole_process::daemon(false);
+//        echo 'FID:'.posix_getpid().PHP_EOL;//获取主进程id
+        swoole_process::daemon(true);
         swoole_process::wait();
     }
 
