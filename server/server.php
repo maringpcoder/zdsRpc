@@ -25,11 +25,11 @@ $cmd = '/usr/local/php/bin/php';
 function  syncServer()
 {
     echo (yield ['mysqlPool']) .PHP_EOL;
-//    echo (yield ['redisPool']) .PHP_EOL;
-//    echo (yield ['task']) .PHP_EOL;
-//    echo (yield ['hProse']) .PHP_EOL;
+//todo redis线程池服务    echo (yield ['redisPool']) .PHP_EOL;
+//todo task服务,检测各服务的状况,并实现重连    echo (yield ['task']) .PHP_EOL;
+    echo (yield ['hProse']) .PHP_EOL;
 }
-
+$stashStartUpFile=array();
 //异步调用
 function asyncCaller(Generator $gen)
 {
@@ -42,8 +42,8 @@ function asyncCaller(Generator $gen)
                 foreach (glob(__DIR__.'/mysql/*.php') as $k =>$startUpFile){
                     exec($cmd.' '.$startUpFile);
                 }
-                echo "Mysql Pool Service Success......".PHP_EOL;
-                $gen ->send("Mysql Pool Service Success!");
+                echo "Mysql Pool Service Ready to start ........".PHP_EOL;
+                $gen ->send("Mysql Pool Service Start Successful!");
                 asyncCaller($gen);
                 break;
             case 'redisPool':
@@ -51,7 +51,7 @@ function asyncCaller(Generator $gen)
                     exec($cmd.' '.$startUpFile);
                 }
                 echo "Cache Driver Pool Service Success......".PHP_EOL;
-                $gen->send("Cache Driver Pool Service Success!");
+                $gen->send("Cache Driver Pool Service Successful!");
                 asyncCaller($gen);
                 break;
             case 'task':
@@ -63,11 +63,11 @@ function asyncCaller(Generator $gen)
                 asyncCaller($gen);
                 break;
             case 'hProse':
-                foreach (glob(__DIR__.'/') as $startUpFile){
+                foreach (glob(__DIR__.'/hprose') as $startUpFile){
                     exec($cmd.' '.$startUpFile);
                 }
-                echo 'The hProse Rpc Service Start......'.PHP_EOL;
-                $gen->send('The hProse Rpc Service Start!');
+                echo 'The hProse Rpc Service Ready to Start ........'.PHP_EOL;
+                $gen->send('The hProse Rpc Service Start Successful!');
                 asyncCaller($gen);
                 break;
             default:
@@ -85,12 +85,10 @@ if($argc == 2){
             asyncCaller(syncServer());
             break;
         case 'stop'://停止服务
-            exec("ps -ef|grep -E '".$cmd."|grep -v 'grep'| awk'{print $2}'|xargs kill -9 > /dev/null 2>&1 &");
-            echo "Kill all process success.".PHP_EOL;
+            killAllProcess($cmd);
             break;
         case 'restart'://重启服务
-            exec("ps -ef|grep -E '".$cmd."|grep -v 'grep'| awk'{print $2}'|xargs kill -9 > /dev/null 2>&1 &");
-            echo "Kill all process success.".PHP_EOL;
+            killAllProcess($cmd);
             asyncCaller(syncServer());
             break;
         default:
@@ -106,3 +104,21 @@ if($argc == 2){
     exit('php server.php start|stop|restart'.PHP_EOL);
 }
 
+function killAllProcess($cmd)
+{
+    $stashStartUpFile=array();
+    foreach (glob(__DIR__.'/mysql/*.php') as $k =>$startUpFile){
+        array_push($stashStartUpFile,$startUpFile);
+    }
+    foreach (glob(__DIR__.'/hprose/*.php') as $startUpFile){
+        array_push($stashStartUpFile,$startUpFile);
+    }
+    call_user_func(function($startUpFile)use($cmd){
+        $stasTask = count($startUpFile);
+        for ($n=0;$n<$stasTask;$n++){
+            echo "Ready to kill $cmd {$startUpFile[$n]}".PHP_EOL;
+            exec("ps -ef|grep -E '".$cmd." ".$startUpFile[$n]."' |grep -v 'grep'| awk '{print $2}'|xargs kill -9 > /dev/null 2>&1 &");
+        }
+        echo "Kill all process success.".PHP_EOL;
+    },$stashStartUpFile);
+}

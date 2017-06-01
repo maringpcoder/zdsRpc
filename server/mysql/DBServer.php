@@ -43,7 +43,7 @@ class DBServer {
             $this ->http->set([
                 'worker_num'=>1,//1个进程大概占用40M内存，值不易过大，否者CPU开销负载太高
                 'max_request'=>0,//主要解决php内存泄漏溢出问题，这里显示设置未0
-                'daemonize'=>false,
+                'daemonize'=>true,
                 'dispatch_mode'=>1,
                 'log_file'=>$this->SerConfig['logfile'].'/swoole_mysql_async.log'//服务运行日志，定义标准输出到应用目录下,服务器上需要做定时策略，定期清理日志(swoole不会切分文件)
             ]);
@@ -52,7 +52,7 @@ class DBServer {
                 'worker_num' => 1,
                 'task_worker_num' => $this->poolSize,
                 'max_request' => 0,
-                'daemonize' => false,
+                'daemonize' => true,
                 'dispatch_mode' => 1,//todo 使用该模式可能会有问题还需考虑
                 'log_file' => $this->SerConfig['logfile'].'swoole_mysql_sync.log'
             ]);
@@ -67,7 +67,6 @@ class DBServer {
 
         $this ->http->on('Receive' , array(&$this,'onReceive'));
         $this ->http->start();
-
     }
 
     public function onReceive(swoole_server $server, int $fd, int $from_id, string $sql){
