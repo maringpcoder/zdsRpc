@@ -18,6 +18,8 @@ class UserModel extends BaseModel
     public function getUserById()
     {
 //        return $this ->db ->select($this->table,['name','id'],["id"=>[2,3,4,5]]);
-        return $this ->db ->query('select * from user')->fetchAll();
+//        return $this ->db ->query('select * from user')->fetchAll(PDO::FETCH_ASSOC);
+        return $this ->db->select($this->table,['name','id']);
+        //return $this ->db ->query('select * from user')->fetchAll();
     }
 }

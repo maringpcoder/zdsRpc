@@ -7,12 +7,22 @@
  */
 class IndexController extends Yaf_Controller_Abstract {
 
-	/** 
+	/**
      * 默认动作
      * Yaf支持直接把Yaf_Request_Abstract::getParam()得到的同名参数作为Action的形参
      * 对于如下的例子, 当访问http://yourhost/ApiService/index/index/index/name/root 的时候, 你就会发现不同
      */
 	public function indexAction($name = "Stranger") {
+	    $redis = new Redis();
+        $redis ->pconnect('192.168.3.176',6379);
+
+//        new RedisCache();
+//        $configObjecter =Yaf_Registry::get('config')->Cache->toArray()['redis'];
+        var_dump(Yaf_Registry::get('config')->application->log);
+        //var_dump(Yaf_Registry::get('config')->application->log->toArray());
+        exit();
+
+
         $configObjecter =Yaf_Registry::get('config');
         var_dump($configObjecter);
         $cf =$configObjecter->database->config->toArray();
@@ -37,10 +47,10 @@ class IndexController extends Yaf_Controller_Abstract {
         //print_r($data);
         for ($i=0; $i <10 ; $i++) {
             //$dbClient->query("INSERT INTO user(name) VALUES('$i')");
-            $dbClient ->insert('panda_log.user',['name'=>"zhengdiao".$i,'age'=>23]);
+            $dbClient ->insert('user',['name'=>"zhengdiao".$i,'age'=>23]);
             //echo "INSERT INTO user(name) VALUES('$i')";
         }
-        $data=$dbClient->query("select * from user");
+        $data=$dbClient->query("select *  from user");
         echo  $data;
 //        $dbClient->close();
 //        print_r($data);
@@ -53,19 +63,31 @@ class IndexController extends Yaf_Controller_Abstract {
         echo json_encode($userModel ->getUserById());
     }
 
-
-
     public function hproseAction(){
-        //hprose调用
-//        try{
-//            echo user_TestFc();
-//            echo testFc();exit();
-//        }catch (Exception $exception){
-//            echo $exception->getMessage();
-//        }
-        echo hprose::getInstance()->getdata();
-        echo hprose::getInstance()->getUserInfo();
-        exit;
+        echo ClientRpc::getClient()->getAllUser(3,5);
+    }
+
+    public function getUsAction(){
+        $us = new UserModel();
+        var_dump($us ->getUserById());
+    }
+
+    public function getAgentIdAction()
+    {
+        echo ClientRpc::getClient()->getAgentId();
+//          echo HProseClient::getInstance()->getAgentId();
+    }
+
+    public function updateUserAction()
+    {
+        echo HProseClient::getInstance()->updateUser(['name'=>'孙雨梅','age'=>90],['id'=>1]);
+    }
+
+    public function userListAction()
+    {
+        $sql = 'select * from `user` ';
+        echo HProseClient::getInstance()->getUserByPage($sql,2,2);
+
 
     }
 

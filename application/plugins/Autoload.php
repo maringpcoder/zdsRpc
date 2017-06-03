@@ -1,6 +1,6 @@
 <?php
 /**
- * 自定义插件
+ * 定义自动载入类库以及function的插件
  * Created by PhpStorm.
  * User: marin
  * Date: 2017/5/27
