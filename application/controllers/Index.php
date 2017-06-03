@@ -86,7 +86,8 @@ class IndexController extends Yaf_Controller_Abstract {
     public function userListAction()
     {
         $sql = 'select * from `user` ';
-        echo HProseClient::getInstance()->getUserByPage($sql,2,2);
+//        echo $sql;
+       echo HProseClient::getInstance()->getUserByPage($sql,2,2);
 
 
     }

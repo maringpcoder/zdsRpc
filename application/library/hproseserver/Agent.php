@@ -12,7 +12,7 @@ class hProseServer_Agent extends Mysql_MysqlUsePool
 
     public function getAgentId()
     {
-        $data = hProseServer_Factory::New() ->query('select * from `user` ')->fetchAll(PDO::FETCH_ASSOC);
+        $data = hProseServer_Factory::NewDB() ->query('select * from `user` ')->fetchAll(PDO::FETCH_ASSOC);
         return writeToJson(1000,'',$data);
     }
     public function updateUser($data,$where)

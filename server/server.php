@@ -22,14 +22,34 @@ if(php_sapi_name()!='cli'){
     exit('Please use php cli model.'.PHP_EOL);
 }
 $cmd = '/usr/local/php/bin/php';
+
+/**
+ * 异步任务生成器
+ */
 function  syncServer()
 {
+    echo (yield ['thrift']) .PHP_EOL;
     echo (yield ['mysqlPool']) .PHP_EOL;
 //todo redis线程池服务    echo (yield ['redisPool']) .PHP_EOL;
 //todo task服务,检测各服务的状况,并实现重连    echo (yield ['task']) .PHP_EOL;
     echo (yield ['hProse']) .PHP_EOL;
 }
 $stashStartUpFile=array();
+
+//argc??
+if($argc == 2){
+    serviceHandler($argv,$cmd);
+}else{
+    echo "please input option number:".PHP_EOL."1)start ".PHP_EOL."2)stop ".PHP_EOL."3)restart".PHP_EOL;
+    $sh = fgetc(STDIN);
+    $cmdOption = ['start'=>1,'stop'=>2,'restart'=>3];
+    if(!in_array($sh,$cmdOption)){
+        echo 'Please input Correct params example：'.PHP_EOL;
+        exit('php server.php start|stop|restart'.PHP_EOL);
+    }
+    serviceHandler([1=>array_search($sh,$cmdOption)],$cmd);
+}
+
 //异步调用
 function asyncCaller(Generator $gen)
 {
@@ -38,6 +58,9 @@ function asyncCaller(Generator $gen)
     $taskName = $task[0];
     if(isset($taskName)){
         switch ($taskName){
+            case 'thrift':
+                //todo thrift 接入
+                break;
             case 'mysqlPool':
                 foreach (glob(__DIR__.'/mysql/*.php') as $k =>$startUpFile){
                     exec($cmd.' '.$startUpFile);
@@ -76,32 +99,7 @@ function asyncCaller(Generator $gen)
         }
     }
 }
-//argc??
-if($argc == 2){
-//    $server_command = $argv;
-//    !in_array($server_command[1],['start','stop','restart']) && exit('Argv is not Correct'.PHP_EOL);
-//    switch ($server_command[1]){
-//        case 'start'://启动服务
-//            asyncCaller(syncServer());
-//            break;
-//        case 'stop'://停止服务
-//            killAllProcess($cmd);
-//            break;
-//        case 'restart'://重启服务
-//            killAllProcess($cmd);
-//            asyncCaller(syncServer());
-//            break;
-//        default:
-//            exit('This command is not support,try to use start|stop|restart'.PHP_EOL);
-//            break;
-//    }
-    serviceHandler($argv,$cmd);
-}else{
-    echo "please input option number:".PHP_EOL."1)start ".PHP_EOL."2)stop ".PHP_EOL."3)restart";
-    $sh = fgetc(STDIN);
-    echo 'Please input Correct params example：'.PHP_EOL;
-    exit('php server.php start|stop|restart'.PHP_EOL);
-}
+
 
 function serviceHandler($argv,$cmd)
 {
@@ -143,3 +141,4 @@ function killAllProcess($cmd)
         echo "Kill all process success.".PHP_EOL;
     },$stashStartUpFile);
 }
+exit();

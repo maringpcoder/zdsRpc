@@ -15,9 +15,9 @@ class rpcServer
 
     public function __construct()
     {
-        $process = new swoole_process([$this ,'hProseServerCall'],false,true);
-        $process->start();
+        $process = new swoole_process([$this ,'hProseServerCall'],true);
 //        echo 'FID:'.posix_getpid().PHP_EOL;//获取主进程id
+        $process->start();
         swoole_process::daemon(true);
         swoole_process::wait();//可能需要开锁
     }
@@ -32,7 +32,7 @@ class rpcServer
         $hProseConfig = $config_obj->hprose->toArray();
         $this->_server = new Server("tcp://" . $hProseConfig['ServerIp'] . ":" . $hProseConfig['port']);
         $this->_server->setErrorTypes(E_ALL);
-        $this->_server->setDebugEnabled();//打开调试开关
+        //$this->_server->setDebugEnabled();//打开调试开关
         Yaf_Loader::getInstance()->registerLocalNamespace(['hproseserver','cache','mysql']);
         $this->release();
         $this->_server->start();
@@ -86,9 +86,6 @@ class rpcServer
             "getAgentId,updateUser,userList" => new hProseServer_Agent()
         );
     }
-
-
-
 
     public static function run()
     {
