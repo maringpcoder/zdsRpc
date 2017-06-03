@@ -65,4 +65,10 @@ class AutoloadPlugin extends Yaf_Plugin_Abstract
         return $fileArr;
     }
 
+    //TODO 递归目录下所有文件
+    private function  recursionSearchList()
+    {
+
+    }
+
 }

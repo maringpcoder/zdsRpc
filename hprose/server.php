@@ -1,11 +1,11 @@
 <?php
 require_once dirname(__DIR__) . '/hprose/lib/Server.php';
 /**
- * rpc服务端,提供方法,函数,类的公开方法，类的静态方法发布,对象等其他操作
+ * rpc PHP服务端,提供方法,函数,类的公开方法，类的静态方法发布,对象等其他操作,简单封装
  * Created by PhpStorm.
  * User: marin
  * Date: 2017/5/25
- * Time: 0:32
+ * Time: 10:32
  * @property Server  $_server
  */
 
@@ -19,7 +19,7 @@ class rpcServer
         $process->start();
 //        echo 'FID:'.posix_getpid().PHP_EOL;//获取主进程id
         swoole_process::daemon(true);
-        swoole_process::wait();
+        swoole_process::wait();//可能需要开锁
     }
 
     public function hProseServerCall(swoole_process $worker)
@@ -61,7 +61,7 @@ class rpcServer
      */
     protected function releaseObjMethods()
     {
-        $methodConfig = $this ->getPrepareToReleaseConfig();
+        $methodConfig = $this ->getObjPrepareToReleaseConfig();
         foreach ($methodConfig as $methodArr=>$obj){
             $this ->_server ->addMethods(explode(',',$methodArr),$obj);
         }
@@ -78,8 +78,9 @@ class rpcServer
     /**
      * 新加类或者对象的公开方法配置
      */
-    protected function getPrepareToReleaseConfig()
+    protected function getObjPrepareToReleaseConfig()
     {
+        //方法名字符串与对象的映射关系  'public_methodsA,public_methodsB'=>$object
         return $methodsObjectItems = array(
             "getAllUser,editUser" =>new hProseServer_User(),//发布hproseServer_User类中的方法配置
             "getAgentId,updateUser,userList" => new hProseServer_Agent()

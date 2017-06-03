@@ -7,8 +7,9 @@
  */
 class ClientRpc {
     /**
-     * 获取远程调用客户端
-     * @param $clientName
+     * 生成远程调用客户端对象
+     * @param string $clientName
+     * @return HProseClient
      */
     public static function getClient($clientName='hPClient')
     {

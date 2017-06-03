@@ -1,5 +1,6 @@
 <?php
 /**
+ * 使用redis线程池操作redis命令
  * Created by PhpStorm.
  * User: marin
  * Date: 2017/5/31
@@ -7,9 +8,14 @@
  */
 class Cache_RedisPool extends Cache_RedisClient
 {
-    public function hGet($option)
+    protected static $instance=null;
+
+    public function returnResult($option)
     {
         $cmdStr = $this ->commandGenorate($option);
+        if(!$cmdStr){
+            return 'the command is not support';
+        }
         $this ->client->send($cmdStr);
         return $this ->client->recv();
     }
@@ -33,7 +39,17 @@ class Cache_RedisPool extends Cache_RedisClient
             case 'rpush':
                 $cmdStr = "rpush {$option['key']} {$option['value']}";
                 break;
+            default:
+                $cmdStr = false;
         }
         return $cmdStr;
+    }
+
+    public static function getInstance()
+    {
+        if (!(self::$instance instanceof Cache_RedisPool)) {
+            self::$instance = new Cache_RedisPool();
+        }
+        return self::$instance;
     }
 }
