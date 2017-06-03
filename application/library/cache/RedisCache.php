@@ -48,9 +48,6 @@ class Cache_RedisCache
         }
     }
 
-
-
-
     public static function getInstance() {
         if (!self::$instance instanceof Cache_RedisCache) {
             self::$instance = new self();
@@ -80,6 +77,11 @@ class Cache_RedisCache
         }
     }
 
+    /**
+     * 获取所有的field-value
+     * @param $key
+     * @return array|bool
+     */
     public function hGetAll($key) {
         if ($this->conn) {
             $result = $this->_redis->hGetAll($key);
@@ -90,6 +92,13 @@ class Cache_RedisCache
         }
         return false;
     }
+
+    /**
+     * 获取hash field
+     * @param $key
+     * @param $field
+     * @return bool|string
+     */
     public function hGet($key, $field) {
         if ($this->conn) {
             $result = $this->_redis->hGet($key, $field);
@@ -101,6 +110,12 @@ class Cache_RedisCache
         return false;
     }
 
+    /**
+     *
+     * @param $key
+     * @param $field
+     * @return bool|string
+     */
     public function hGet2($key, $field)
     {
         if ($this->conn) {
@@ -113,6 +128,12 @@ class Cache_RedisCache
         return false;
     }
 
+    /**
+     * 批量获取hash的存储的值
+     * @param $key
+     * @param $fieldArray
+     * @return array|bool
+     */
     public function hMget($key, $fieldArray) {
         if (!is_array($fieldArray)) {
             return false;
@@ -146,6 +167,12 @@ class Cache_RedisCache
         return $result;
     }
 
+    /**
+     * 批量设置hash
+     * @param $key
+     * @param $fieldValueArray
+     * @return bool
+     */
     public function hMset($key, $fieldValueArray) {
         if (!is_array($fieldValueArray)) {
             return false;
@@ -160,6 +187,12 @@ class Cache_RedisCache
         }
     }
 
+    /**
+     * 删除hash field
+     * @param $key
+     * @param $field
+     * @return bool|int
+     */
     public function hDel($key, $field) {
         if ($this->conn) {
             return $this->_redis->hDel($key, $field);
@@ -167,6 +200,13 @@ class Cache_RedisCache
         Log::getInstance()->println('Cache Redis is disconnected.....');
         return false;
     }
+
+    /**
+     * 入左链表头
+     * @param $key
+     * @param $data
+     * @return bool|int
+     */
     public function lPush($key, $data) {
         if ($this->conn) {
             return $this->_redis->lPush($key, json_encode($data));
@@ -175,14 +215,25 @@ class Cache_RedisCache
         return false;
     }
 
-    public function getRedis()
-    {
-        return $this->_redis;
-    }
+
+    /**
+     * 检查hash key or field 是否存在
+     * @param $key
+     * @param $field
+     * @return bool
+     */
     public function hExists($key, $field)
     {
         return $this->_redis->hExists($key, $field);
     }
+
+    /**
+     * 原子性的+操作
+     * @param $key
+     * @param $field
+     * @param $increment
+     * @return int
+     */
     public function hIncrBy($key, $field, $increment)
     {
         return $this->_redis->hIncrBy($key, $field, $increment);

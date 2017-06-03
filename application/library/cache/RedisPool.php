@@ -14,7 +14,10 @@ class Cache_RedisPool extends Cache_RedisClient
         return $this ->client->recv();
     }
 
-
+    /**
+     * @param $option ['cmd'=>'hGet','field']
+     * @return string
+     */
     protected function commandGenorate($option)
     {
         switch ($option['cmd']){
