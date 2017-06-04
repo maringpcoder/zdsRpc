@@ -18,6 +18,19 @@ class Handler implements rpcIf
     public function sendMessage(\Bin\rpc\Message $msg)
     {
         // TODO: Implement sendMessage() method.
-        return 'this is ferformance framework stating!';
+        $result=['code'=>1000,'msg'=>'','data'=>'ok'];
+        return json_encode($result);
+    }
+
+
+    /**
+     * @param int $id
+     * @return string
+     */
+    public function getUserInfoById($id)
+    {
+        // TODO: Implement getUserInfoById() method.
+        $result=['code'=>1001,'msg'=>'','data'=>['name'=>'zhengdiao','age'=>21]];
+        return json_encode($result);
     }
 }

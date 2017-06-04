@@ -21,4 +21,5 @@ struct Message
 service rpc
 {
 	string sendMessage(1:Message msg)
+    string getUserInfoById(1:Int id)
 }

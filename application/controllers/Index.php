@@ -91,11 +91,18 @@ class IndexController extends Yaf_Controller_Abstract {
         $datas=array('name' => 'userinfo','result'=>'{"id":3,"name"=>"zqf",email:"904208360@qq.comn"}');
         $sd->send($datas);
         $info=$sd->getresult();
-        var_dump($info);
+        echo ($info);
 
 //		var_dump($info);
 //		print_r($info);
         $sd->close();
+    }
+
+    public function getUserByIdAction()
+    {
+        $sd = new RpcClient();
+        $sd ->getUserById();
+        echo $sd ->getresult();
     }
 
 

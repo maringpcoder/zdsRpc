@@ -38,6 +38,12 @@ class RpcClient {
 		$this->result=$this->client->sendMessage($this->message);
 	}
 
+	public function getUserById()
+    {
+        $this ->result = $this ->client ->getUserInfoById(12);
+    }
+
+
 	public function sayHello()
     {
         
