@@ -18,11 +18,11 @@ use Thrift\Exception\TApplicationException;
 
 
 final class RetCode {
-  const SUCCESS = 0;
+  const SUCCESS = 10;
   const PARAM_ERROR = 1000;
   const ACCESS_DENY = 1001;
   static public $__names = array(
-    0 => 'SUCCESS',
+    10 => 'SUCCESS',
     1000 => 'PARAM_ERROR',
     1001 => 'ACCESS_DENY',
   );

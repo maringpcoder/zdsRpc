@@ -19,7 +19,7 @@ use Thrift\Exception\TApplicationException;
 interface rpcIf {
   /**
    * @param \Bin\rpc\Message $msg
-   * @return int
+   * @return string
    */
   public function sendMessage(\Bin\rpc\Message $msg);
 }
@@ -174,7 +174,7 @@ class rpc_sendMessage_result {
   static $_TSPEC;
 
   /**
-   * @var int
+   * @var string
    */
   public $success = null;
 
@@ -183,7 +183,7 @@ class rpc_sendMessage_result {
       self::$_TSPEC = array(
         0 => array(
           'var' => 'success',
-          'type' => TType::I32,
+          'type' => TType::STRING,
           ),
         );
     }
@@ -214,8 +214,8 @@ class rpc_sendMessage_result {
       switch ($fid)
       {
         case 0:
-          if ($ftype == TType::I32) {
-            $xfer += $input->readI32($this->success);
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->success);
           } else {
             $xfer += $input->skip($ftype);
           }
@@ -234,8 +234,8 @@ class rpc_sendMessage_result {
     $xfer = 0;
     $xfer += $output->writeStructBegin('rpc_sendMessage_result');
     if ($this->success !== null) {
-      $xfer += $output->writeFieldBegin('success', TType::I32, 0);
-      $xfer += $output->writeI32($this->success);
+      $xfer += $output->writeFieldBegin('success', TType::STRING, 0);
+      $xfer += $output->writeString($this->success);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();

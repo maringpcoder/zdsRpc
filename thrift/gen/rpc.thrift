@@ -20,5 +20,5 @@ struct Message
 
 service rpc
 {
-	RetCode sendMessage(1:Message msg)
+	string sendMessage(1:Message msg)
 }

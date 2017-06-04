@@ -27,6 +27,7 @@ class RpcServer extends TNonblockingServer
         $handler = new $handler_class();
         $this->processor = new $processor_class($handler);
 
+//        $socket = new Socket();
         $socket = new Socket();
         $socket->setHandle($fd);
         $socket->buffer = $data;

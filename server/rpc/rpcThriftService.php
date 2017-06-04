@@ -13,7 +13,7 @@ class  rpcThriftService
     {
         $process = new swoole_process([$this,'rpcServerCall'],false,true);
         $process ->start();
-        swoole_process::daemon(false);
+        swoole_process::daemon(true);
         swoole_process::wait();
     }
 
@@ -42,15 +42,15 @@ class  rpcThriftService
         define('SERVERPORT',$rpc_config['port']);
         define('SERVERHOST',$rpc_config['host']);
 
-        $service = new \Bin\rpc\Handler();
-        $processor = new \Bin\rpc\rpcProcessor($service);
+        $service = new Bin\rpc\Handler();
+        $processor = new Bin\rpc\rpcProcessor($service);
 
-        $socketTransport = new \Thrift\Server\TServerSocket(SERVERIP,SERVERPORT);
+        $socketTransport = new Thrift\Server\TServerSocket(SERVERIP,SERVERPORT);
 
         $out_factory = $in_factory = new Thrift\Factory\TFramedTransportFactory();
         $out_protocol = $in_protocol = new Thrift\Factory\TBinaryProtocolFactory();
 
-        $server = new \swoole\RpcServer($processor, $socketTransport, $in_factory, $out_factory, $in_protocol, $out_protocol);
+        $server = new swoole\RpcServer($processor, $socketTransport, $in_factory, $out_factory, $in_protocol, $out_protocol);
         $server->serve();
 
     }
