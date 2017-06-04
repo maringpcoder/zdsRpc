@@ -60,6 +60,7 @@ function asyncCaller(Generator $gen)
         switch ($taskName){
             case 'thrift':
                 //todo thrift 接入
+
                 break;
             case 'mysqlPool':
                 foreach (glob(__DIR__.'/mysql/*.php') as $k =>$startUpFile){
