@@ -92,7 +92,7 @@ class IndexController extends Yaf_Controller_Abstract {
         $sd->send($datas);
         $info=$sd->getresult();
         echo ($info);
-
+        echo "";
 //		var_dump($info);
 //		print_r($info);
         $sd->close();
