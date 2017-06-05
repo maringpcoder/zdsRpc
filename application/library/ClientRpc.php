@@ -7,8 +7,9 @@
  */
 class ClientRpc {
     /**
-     * 获取远程调用客户端
-     * @param $clientName
+     * 生成远程调用客户端对象
+     * @param string $clientName
+     * @return HProseClient|RpcClient
      */
     public static function getClient($clientName='hPClient')
     {
@@ -17,7 +18,7 @@ class ClientRpc {
                 return HProseClient::getInstance();
                 break;
             case 'Thrift':
-                return ThriftClient::getInstance();
+                return new RpcClient();
                 break;
         }
     }

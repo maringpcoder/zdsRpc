@@ -83,10 +83,34 @@ class IndexController extends Yaf_Controller_Abstract {
         echo HProseClient::getInstance()->updateUser(['name'=>'孙雨梅','age'=>90],['id'=>1]);
     }
 
+    public function tRpcAction()
+    {
+
+        $sd=new RpcClient;
+
+        $datas=array('name' => 'userinfo','result'=>'{"id":3,"name"=>"zqf",email:"904208360@qq.comn"}');
+        $sd->send($datas);
+        $info=$sd->getresult();
+        echo ($info);
+
+//		var_dump($info);
+//		print_r($info);
+        $sd->close();
+    }
+
+    public function getUserByIdAction()
+    {
+        $sd = new RpcClient();
+        $sd ->getUserById();
+        echo $sd ->getresult();
+    }
+
+
     public function userListAction()
     {
         $sql = 'select * from `user` ';
-        echo HProseClient::getInstance()->getUserByPage($sql,2,2);
+//        echo $sql;
+       echo HProseClient::getInstance()->getUserByPage($sql,2,2);
 
 
     }
